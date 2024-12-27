@@ -1,0 +1,9 @@
+<div class="flex items-center justify-center h-full bg-gray-400 rounded">
+    <video *ngIf="videoUrl"
+        [src]="videoUrl"
+        controls
+        class="w-full h-auto"></video>
+    <ng-template #placeholder>
+        <p class="text-gray-700 text-sm">No preview available</p>
+    </ng-template>
+</div>
