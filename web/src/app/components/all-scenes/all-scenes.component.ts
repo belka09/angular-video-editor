@@ -2,26 +2,33 @@ import {
   Component,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  EventEmitter,
   Output,
+  EventEmitter,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-all-scenes',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DragDropModule],
   templateUrl: './all-scenes.component.html',
   styleUrls: ['./all-scenes.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AllScenesComponent {
+  @Output() videoDragged = new EventEmitter<{
+    name: string;
+    duration: number;
+    preview: string;
+  }>();
   @Output() playEvent = new EventEmitter<string>();
+
   videos: Array<{
     name: string;
     url: string;
     preview: string;
-    duration: string;
+    duration: number;
   }> = [];
 
   constructor(private cdr: ChangeDetectorRef) {}
@@ -49,12 +56,12 @@ export class AllScenesComponent {
 
   async extractVideoDetails(
     videoUrl: string
-  ): Promise<{ preview: string; duration: string }> {
+  ): Promise<{ preview: string; duration: number }> {
     return new Promise((resolve) => {
       const video = document.createElement('video');
       video.src = videoUrl;
       video.muted = true;
-      video.currentTime = 2;
+      video.currentTime = 1;
 
       video.addEventListener('loadeddata', () => {
         const canvas = document.createElement('canvas');
@@ -63,7 +70,7 @@ export class AllScenesComponent {
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        const duration = this.formatDuration(video.duration);
+        const duration = Math.round(video.duration);
         resolve({
           preview: canvas.toDataURL('image/jpeg'),
           duration,
@@ -72,18 +79,16 @@ export class AllScenesComponent {
     });
   }
 
-  formatDuration(seconds: number): string {
-    const minutes = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+  playVideo(url: string) {
+    this.playEvent.emit(url);
+  }
+
+  onDragStart(video: { name: string; duration: number; preview: string }) {
+    this.videoDragged.emit(video);
   }
 
   removeVideo(index: number) {
     this.videos.splice(index, 1);
     this.cdr.markForCheck();
-  }
-
-  playVideo(url: string) {
-    this.playEvent.emit(url);
   }
 }

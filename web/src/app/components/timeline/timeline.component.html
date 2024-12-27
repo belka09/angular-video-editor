@@ -1,0 +1,21 @@
+<div class="timeline-container">
+    <div class="ruler">
+        <div *ngFor="let second of [].constructor(totalDuration || 30); let i = index"
+            class="tick">
+            {{ i + 1 }}
+        </div>
+    </div>
+    <div cdkDropList
+        [cdkDropListData]="timeline"
+        class="timeline-track"
+        (cdkDropListDropped)="onDrop($event)">
+        <div *ngFor="let file of timeline"
+            class="timeline-item"
+            [style.flexBasis]="file.duration + 's'">
+            <img [src]="file.preview"
+                alt="Preview"
+                class="thumbnail" />
+            <span class="file-name">{{ file.name }}</span>
+        </div>
+    </div>
+</div>

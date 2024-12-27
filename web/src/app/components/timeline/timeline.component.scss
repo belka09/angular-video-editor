@@ -1,0 +1,48 @@
+.timeline-container {
+  padding: 10px;
+  background-color: #f4f4f4;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.ruler {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: #333;
+}
+
+.tick {
+  width: 40px;
+  text-align: center;
+  border-right: 1px solid #ccc;
+}
+
+.timeline-track {
+  display: flex;
+  gap: 2px;
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  min-height: 60px;
+  align-items: center;
+  border: 1px solid #ccc;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  padding: 5px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.thumbnail {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+}
