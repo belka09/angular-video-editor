@@ -1,10 +1,20 @@
 <div class="timeline-container">
     <div class="ruler">
-        <div *ngFor="let second of [].constructor(totalDuration || 30); let i = index"
+        <!-- <div *ngFor="let second of [].constructor(totalDuration); let i = index"
+            class="tick"
+            [style.left]="
+        totalDuration > 0
+          ? (i / totalDuration) * 100 + '%'
+          : '0%'
+      ">
+            {{ i + 1 }}
+        </div> -->
+        <div *ngFor="let second of createArray(totalDuration); let i = index"
             class="tick">
             {{ i + 1 }}
         </div>
     </div>
+
     <div class="timeline-track"
         cdkDropList
         cdkDropListOrientation="horizontal"
@@ -13,10 +23,11 @@
         [cdkDropListData]="timelineList"
         [cdkDropListConnectedTo]="['scenes']"
         (cdkDropListDropped)="onDrop($event)">
-        <div *ngFor="let file of timelineList"
+        <div *ngFor="let file of timelineList; let i = index"
             class="timeline-item"
             cdkDrag
-            [style.flexBasis]="file.duration + 's'">
+            [style.flexGrow]="file.duration"
+            style="flex-basis: 0;">
             <img [src]="file.preview"
                 alt="Preview"
                 class="thumbnail" />

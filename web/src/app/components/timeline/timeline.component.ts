@@ -1,6 +1,14 @@
-import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import {
+  CdkDragDrop,
+  DragDropModule,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-timeline',
@@ -17,9 +25,12 @@ export class TimelineComponent {
     preview: string;
     url: string;
   }> = [];
+
   totalDuration = 0;
 
-  onDrop(event: any) {
+  constructor(private cdr: ChangeDetectorRef) {}
+
+  onDrop(event: CdkDragDrop<any[]>) {
     if (event.previousContainer === event.container) {
       moveItemInArray(
         this.timelineList,
@@ -29,9 +40,22 @@ export class TimelineComponent {
     } else {
       const file = event.previousContainer.data[event.previousIndex];
       this.timelineList.push({ ...file });
-      // this.totalDuration += file.duration;
     }
-    // this.totalDuration += file.duration;
-    // console.log('totalDuration', this.totalDuration);
+    this.recalculateTotalDuration();
+
+    this.cdr.markForCheck();
+  }
+
+  createArray(count: number): number[] {
+    return [...new Array(count).keys()];
+  }
+
+  private recalculateTotalDuration() {
+    this.totalDuration = this.timelineList.reduce(
+      (acc, clip) => acc + clip.duration,
+      0
+    );
+
+    this.cdr.markForCheck();
   }
 }
