@@ -1,14 +1,6 @@
-<div class="timeline-container">
+<div class="timeline-container min-h"
+    [ngStyle]="timelineList.length > 0 ? {' min-height': 'fit-content'} : {' min-height': '120px'} ">
     <div class="ruler">
-        <!-- <div *ngFor="let second of [].constructor(totalDuration); let i = index"
-            class="tick"
-            [style.left]="
-        totalDuration > 0
-          ? (i / totalDuration) * 100 + '%'
-          : '0%'
-      ">
-            {{ i + 1 }}
-        </div> -->
         <div *ngFor="let second of createArray(totalDuration); let i = index"
             class="tick">
             {{ i + 1 }}
@@ -28,10 +20,14 @@
             cdkDrag
             [style.flexGrow]="file.duration"
             style="flex-basis: 0;">
-            <img [src]="file.preview"
-                alt="Preview"
-                class="thumbnail" />
-            <span class="file-name">{{ file.name }}</span>
+            <div class="frame"
+                *ngFor="let frame of file.frames; let s = index">
+                <img [src]="frame"
+                    alt="Frame"
+                    class="thumbnail" />
+            </div>
         </div>
     </div>
+
+
 </div>
