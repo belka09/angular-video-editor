@@ -1,5 +1,5 @@
 <div class="min-h-screen flex flex-col bg-gray-100">
-    <header class="bg-black text-white px-4 py-2">
+    <header class="bg-gray-700 text-white px-4 py-2">
         <h1 class="text-xl font-bold">WAFFLLE</h1>
     </header>
     <main class="flex flex-1 p-4 gap-4">
@@ -10,6 +10,18 @@
             <app-preview [videoUrl]="selectedVideoUrl"></app-preview>
         </section>
     </main>
+    <section class="mt-4 flex justify-between px-4">
+        <div class="flex gap-3">
+            <button aria-label="Zoom in">
+                🔎
+            </button>
+            <button aria-label="Zoom out">
+                🔎
+            </button>
+        </div>
+        <button type="button"
+            class="text-white py-2 px-6 rounded-md bg-gray-700 hover:bg-gray-900">Play</button>
+    </section>
     <section class="mt-4 p-4 bg-white shadow rounded">
         <app-timeline></app-timeline>
     </section>

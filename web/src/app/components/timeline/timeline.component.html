@@ -1,13 +1,14 @@
-<div class="timeline-container min-h"
+<div class="min-h flex justify-between flex-col rounded-lg bg-gray-200 overflow-hidden text-white"
     [ngStyle]="timelineList.length > 0 ? {' min-height': 'fit-content'} : {' min-height': '120px'} ">
-    <div class="ruler">
-        <div *ngFor="let second of createArray(totalDuration); let i = index"
-            class="tick">
+    <div class="flex justify-between border-b-[1px] border-gray-400 bg-gray-700">
+        <div *ngFor="let second of createArray(totalDuration); let i = index; let last = last"
+            class="text-white border-gray-400 border-r-2 flex-1 pt-1 text-center"
+            [class.!border-r-0]="last">
             {{ i + 1 }}
         </div>
     </div>
 
-    <div class="timeline-track"
+    <div class="flex flex-1 items-stretch py-1"
         cdkDropList
         cdkDropListOrientation="horizontal"
         id="timeline"
@@ -15,19 +16,26 @@
         [cdkDropListData]="timelineList"
         [cdkDropListConnectedTo]="['scenes']"
         (cdkDropListDropped)="onDrop($event)">
-        <div *ngFor="let file of timelineList; let i = index"
-            class="timeline-item"
+        <div *ngFor="let file of timelineList; let i = index; let last = last"
+            class="timeline-item flex overflow-hidden gap-1"
             cdkDrag
             [style.flexGrow]="file.duration"
             style="flex-basis: 0;">
-            <div class="frame"
+            <div class="flex flex-1 flex-col items-center p-[2px] justify-center"
+                [class.!border-r-0]="last"
                 *ngFor="let frame of file.frames; let s = index">
                 <img [src]="frame"
                     alt="Frame"
-                    class="thumbnail" />
+                    class="object-cover" />
             </div>
         </div>
     </div>
 
-
+    <div class="flex justify-between border-t-[1px] border-gray-400 bg-gray-700">
+        <div *ngFor="let second of createArray(totalDuration); let i = index; let last = last"
+            class="text-white border-gray-400 border-r-2 flex-1 pt-1 text-center"
+            [class.!border-r-0]="last">
+            {{ i + 1 }}
+        </div>
+    </div>
 </div>
