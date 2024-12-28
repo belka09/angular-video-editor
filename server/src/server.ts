@@ -1,17 +1,101 @@
 import express from 'express';
+import multer from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+import { exec } from 'child_process';
+import path from 'path';
+import fs from 'fs';
 import cors from 'cors';
 
 const app = express();
-const PORT = 3000;
+const port = 3000;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+app.use(
+  cors({
+    origin: 'http://localhost:4200',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
-// Static files for uploads
-app.use('/uploads', express.static('uploads'));
+const upload = multer({ dest: 'uploads/' });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+const tempDir = path.join(__dirname, 'temp');
+const processedVideosDir = path.join(__dirname, 'processedVideos');
+
+if (!fs.existsSync(tempDir)) {
+  fs.mkdirSync(tempDir);
+}
+
+if (!fs.existsSync(processedVideosDir)) {
+  fs.mkdirSync(processedVideosDir);
+}
+
+const videoStore: { [key: string]: string } = {};
+
+const execPromise = (command: string): Promise<void> =>
+  new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error('FFmpeg Error:', stderr);
+        reject(new Error(`FFmpeg command failed: ${command}\n${stderr}`));
+      } else {
+        resolve();
+      }
+    });
+  });
+
+app.post('/process', upload.array('videos'), async (req, res) => {
+  try {
+    const { start, end } = req.body;
+
+    if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+      res.status(400).json({ error: 'No videos uploaded' });
+      return;
+    }
+
+    const videos = req.files as Express.Multer.File[];
+    const concatFile = path.join(tempDir, `concat_${uuidv4()}.txt`);
+
+    const fileList = videos.map((file) => `file '${file.path}'`).join('\n');
+    fs.writeFileSync(concatFile, fileList);
+
+    const outputFile = path.join(processedVideosDir, `${uuidv4()}.mp4`);
+    const tempFile = path.join(processedVideosDir, `temp_${uuidv4()}.mp4`);
+
+    await execPromise(
+      `ffmpeg -f concat -safe 0 -i ${concatFile} -c copy ${tempFile}`
+    );
+
+    await execPromise(
+      `ffmpeg -i ${tempFile} -ss ${start} -to ${end} -c copy ${outputFile}`
+    );
+
+    fs.unlinkSync(concatFile);
+    fs.unlinkSync(tempFile);
+    videos.forEach((file) => fs.unlinkSync(file.path));
+
+    const id = uuidv4();
+    videoStore[id] = outputFile;
+
+    res.json({ id });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error processing videos' });
+  }
+});
+
+app.get('/video/:id', (req, res) => {
+  const { id } = req.params;
+
+  const filePath = videoStore[id];
+  if (!filePath || !fs.existsSync(filePath)) {
+    res.status(404).json({ error: 'Video not found' });
+    return;
+  }
+
+  res.sendFile(filePath);
+});
+
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
 });

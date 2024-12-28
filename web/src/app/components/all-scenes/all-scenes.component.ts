@@ -61,7 +61,7 @@ export class AllScenesComponent {
       const video = document.createElement('video');
       video.src = videoUrl;
       video.muted = true;
-      video.currentTime = 1;
+      video.currentTime = 2;
 
       video.addEventListener('loadeddata', () => {
         const canvas = document.createElement('canvas');

@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { AllScenesComponent } from '../all-scenes/all-scenes.component';
 import { PreviewComponent } from '../preview/preview.component';
 import { TimelineComponent } from '../timeline/timeline.component';
+import { VideoService } from '../../services/video.service';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-layout',
@@ -19,7 +21,36 @@ import { TimelineComponent } from '../timeline/timeline.component';
 export class LayoutComponent {
   selectedVideoUrl: string | null = null;
 
+  constructor(
+    private apiService: ApiService,
+    private videoService: VideoService
+  ) {}
+
   onPlayVideo(url: string) {
     this.selectedVideoUrl = url;
+  }
+
+  async renderVideo() {
+    try {
+      const files: File[] = await this.videoService.createFilesFromTimeline();
+
+      // Создаем FormData для отправки API
+      const formData = new FormData();
+      files.forEach((file) => formData.append('videos', file));
+      formData.append('start', this.videoService.timeLineStart().toString());
+      formData.append('end', this.videoService.timeLineEnd().toString());
+
+      // Отправляем данные на сервер
+      this.apiService.processVideos(formData).subscribe({
+        next: (res) => {
+          console.log('Видео успешно отправлено на сервер:', res);
+        },
+        error: (err) => {
+          console.error('Ошибка при отправке видео:', err);
+        },
+      });
+    } catch (error) {
+      console.error('Ошибка при подготовке видео:', error);
+    }
   }
 }
