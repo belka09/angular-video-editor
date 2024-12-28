@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DragDropModule } from '@angular/cdk/drag-drop';
+import { DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-timeline',
@@ -20,15 +20,17 @@ export class TimelineComponent {
   totalDuration = 0;
 
   onDrop(event: any) {
-    console.log('onDrop', event);
-    console.log(
-      'data',
-      event.previousContainer.data,
-      event.previousIndex,
-      event.currentIndex
-    );
-    const file = event.previousContainer.data[event.previousIndex];
-    this.timelineList.push({ ...file });
+    if (event.previousContainer === event.container) {
+      moveItemInArray(
+        this.timelineList,
+        event.previousIndex,
+        event.currentIndex
+      );
+    } else {
+      const file = event.previousContainer.data[event.previousIndex];
+      this.timelineList.push({ ...file });
+      // this.totalDuration += file.duration;
+    }
     // this.totalDuration += file.duration;
     // console.log('totalDuration', this.totalDuration);
   }

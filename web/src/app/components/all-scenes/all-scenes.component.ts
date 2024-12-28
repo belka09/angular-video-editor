@@ -7,7 +7,11 @@ import {
   Input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
+import {
+  CdkDragDrop,
+  DragDropModule,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-all-scenes',
@@ -80,7 +84,10 @@ export class AllScenesComponent {
   }
 
   drop(event: CdkDragDrop<any[]>) {
-    console.log('event', event);
+    if (event.previousContainer === event.container) {
+      moveItemInArray(this.videos, event.previousIndex, event.currentIndex);
+      return;
+    }
   }
 
   removeVideo(index: number) {
