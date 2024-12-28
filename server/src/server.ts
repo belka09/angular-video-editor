@@ -56,7 +56,10 @@ app.post('/process', upload.array('videos'), async (req, res) => {
     const videos = req.files as Express.Multer.File[];
     const concatFile = path.join(tempDir, `concat_${uuidv4()}.txt`);
 
-    const fileList = videos.map((file) => `file '${file.path}'`).join('\n');
+    const fileList = videos
+      .map((file) => `file '${path.resolve(file.path)}'`)
+      .join('\n');
+
     fs.writeFileSync(concatFile, fileList);
 
     const outputFile = path.join(processedVideosDir, `${uuidv4()}.mp4`);

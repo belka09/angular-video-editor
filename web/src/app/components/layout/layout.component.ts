@@ -34,19 +34,14 @@ export class LayoutComponent {
     try {
       const files: File[] = await this.videoService.createFilesFromTimeline();
 
-      // Создаем FormData для отправки API
       const formData = new FormData();
       files.forEach((file) => formData.append('videos', file));
       formData.append('start', this.videoService.timeLineStart().toString());
       formData.append('end', this.videoService.timeLineEnd().toString());
 
-      // Отправляем данные на сервер
       this.apiService.processVideos(formData).subscribe({
-        next: (res) => {
-          console.log('Видео успешно отправлено на сервер:', res);
-        },
         error: (err) => {
-          console.error('Ошибка при отправке видео:', err);
+          console.error('Upload error:', err);
         },
       });
     } catch (error) {
