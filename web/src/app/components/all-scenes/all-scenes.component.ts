@@ -4,9 +4,10 @@ import {
   ChangeDetectorRef,
   Output,
   EventEmitter,
+  Input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DragDropModule } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-all-scenes',
@@ -17,11 +18,6 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AllScenesComponent {
-  @Output() videoDragged = new EventEmitter<{
-    name: string;
-    duration: number;
-    preview: string;
-  }>();
   @Output() playEvent = new EventEmitter<string>();
 
   videos: Array<{
@@ -83,8 +79,8 @@ export class AllScenesComponent {
     this.playEvent.emit(url);
   }
 
-  onDragStart(video: { name: string; duration: number; preview: string }) {
-    this.videoDragged.emit(video);
+  drop(event: CdkDragDrop<any[]>) {
+    console.log('event', event);
   }
 
   removeVideo(index: number) {

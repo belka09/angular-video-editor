@@ -11,16 +11,25 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TimelineComponent {
-  @Input() timeline: Array<{
+  timelineList: Array<{
     name: string;
     duration: number;
     preview: string;
+    url: string;
   }> = [];
   totalDuration = 0;
 
   onDrop(event: any) {
-    const file = event.item.data;
-    this.timeline.push({ ...file });
-    this.totalDuration += file.duration;
+    console.log('onDrop', event);
+    console.log(
+      'data',
+      event.previousContainer.data,
+      event.previousIndex,
+      event.currentIndex
+    );
+    const file = event.previousContainer.data[event.previousIndex];
+    this.timelineList.push({ ...file });
+    // this.totalDuration += file.duration;
+    // console.log('totalDuration', this.totalDuration);
   }
 }

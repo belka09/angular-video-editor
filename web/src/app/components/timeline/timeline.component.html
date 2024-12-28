@@ -5,12 +5,17 @@
             {{ i + 1 }}
         </div>
     </div>
-    <div cdkDropList
-        [cdkDropListData]="timeline"
-        class="timeline-track"
+    <div class="timeline-track"
+        cdkDropList
+        cdkDropListOrientation="horizontal"
+        id="timeline"
+        #timeline="cdkDropList"
+        [cdkDropListData]="timelineList"
+        [cdkDropListConnectedTo]="['scenes']"
         (cdkDropListDropped)="onDrop($event)">
-        <div *ngFor="let file of timeline"
+        <div *ngFor="let file of timelineList"
             class="timeline-item"
+            cdkDrag
             [style.flexBasis]="file.duration + 's'">
             <img [src]="file.preview"
                 alt="Preview"

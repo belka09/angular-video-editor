@@ -5,12 +5,16 @@
         accept="video/*"
         class="block w-full p-2 mb-4 border border-gray-300 rounded"
         (change)="onFileSelected($event)" />
-    <ul class="space-y-4">
+    <ul class="space-y-4"
+        cdkDropList
+        id="scenes"
+        #scenes="cdkDropList"
+        [cdkDropListData]="videos"
+        [cdkDropListConnectedTo]="['timeline']"
+        (cdkDropListDropped)="drop($event)">
         <li *ngFor="let video of videos; let i = index"
-            cdkDrag
-            [cdkDragData]="video"
-            (cdkDragStarted)="onDragStart(video)"
-            class="p-2 bg-gray-200 rounded shadow flex items-center gap-4">
+            class="p-2 bg-gray-200 rounded shadow flex items-center gap-4"
+            cdkDrag>
             <img [src]="video.preview"
                 alt="Video preview"
                 class="w-20 h-20 object-cover rounded" />
