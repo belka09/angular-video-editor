@@ -4,7 +4,6 @@ import {
   ChangeDetectorRef,
   Output,
   EventEmitter,
-  Input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -13,6 +12,7 @@ import {
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
 import { ToasterService } from '../../services/toaster.service';
+import { LoaderService } from '../../services/loader.service';
 
 @Component({
   selector: 'app-all-scenes',
@@ -34,59 +34,55 @@ export class AllScenesComponent {
 
   constructor(
     private cdr: ChangeDetectorRef,
-    private toasterService: ToasterService
+    private toasterService: ToasterService,
+    private loaderService: LoaderService
   ) {}
 
-  onFileSelected(event: any) {
+  async onFileSelected(event: any) {
     const files = event.target.files;
     if (!files || files.length === 0) {
       this.toasterService.showToast('error', 'No files selected!');
       return;
     }
 
-    for (const file of files) {
-      if (!file.type.startsWith('video/')) {
+    this.loaderService.showLoader();
+
+    try {
+      for (const file of files) {
+        if (!file.type.startsWith('video/')) {
+          this.toasterService.showToast(
+            'error',
+            `Invalid file type: ${file.name}. Only video files are supported.`
+          );
+          continue;
+        }
+
+        const fileReader = new FileReader();
+        const url = await new Promise<string>((resolve, reject) => {
+          fileReader.onload = (e: any) => resolve(e.target.result);
+          fileReader.onerror = () =>
+            reject(new Error(`Failed to read file: ${file.name}`));
+          fileReader.readAsDataURL(file);
+        });
+
+        const { preview, duration } = await this.extractVideoDetails(url);
+        this.videos.push({
+          name: file.name,
+          url,
+          preview,
+          duration,
+        });
+
         this.toasterService.showToast(
-          'error',
-          `Invalid file type: ${file.name}. Only video files are supported.`
+          'success',
+          `Video "${file.name}" added successfully!`
         );
-        continue;
+        this.cdr.markForCheck();
       }
-
-      const fileReader = new FileReader();
-      fileReader.onload = (e: any) => {
-        const url = e.target.result;
-
-        this.extractVideoDetails(url)
-          .then(({ preview, duration }) => {
-            this.videos.push({
-              name: file.name,
-              url,
-              preview,
-              duration,
-            });
-            this.toasterService.showToast(
-              'success',
-              `Video "${file.name}" added successfully!`
-            );
-            this.cdr.markForCheck();
-          })
-          .catch((err) => {
-            this.toasterService.showToast(
-              'error',
-              `Failed to process video "${file.name}". ${err.message}`
-            );
-          });
-      };
-
-      fileReader.onerror = () => {
-        this.toasterService.showToast(
-          'error',
-          `Failed to read file: ${file.name}`
-        );
-      };
-
-      fileReader.readAsDataURL(file);
+    } catch (err: any) {
+      this.toasterService.showToast('error', err.message);
+    } finally {
+      this.loaderService.hideLoader();
     }
   }
 

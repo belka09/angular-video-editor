@@ -1,0 +1,7 @@
+.loader-overlay {
+  @apply fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50;
+}
+
+.loader-spinner {
+  @apply w-12 h-12 border-4 border-gray-200 border-t-gray-600 rounded-full animate-spin;
+}

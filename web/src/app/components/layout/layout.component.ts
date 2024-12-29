@@ -6,6 +6,7 @@ import { TimelineComponent } from '../timeline/timeline.component';
 import { VideoService } from '../../services/video.service';
 import { ApiService } from '../../services/api.service';
 import { ToasterService } from '../../services/toaster.service';
+import { LoaderService } from '../../services/loader.service';
 
 @Component({
   selector: 'app-layout',
@@ -25,7 +26,8 @@ export class LayoutComponent {
   constructor(
     private apiService: ApiService,
     private videoService: VideoService,
-    private toasterService: ToasterService
+    private toasterService: ToasterService,
+    private loaderService: LoaderService
   ) {}
 
   onPlayVideo(url: string) {
@@ -39,6 +41,7 @@ export class LayoutComponent {
         'warning',
         'Rendering video, please wait...'
       );
+      this.loaderService.showLoader();
       const files: File[] = await this.videoService.createFilesFromTimeline();
 
       const formData = new FormData();
@@ -56,9 +59,11 @@ export class LayoutComponent {
                 'success',
                 'Video rendering completed!'
               );
+              this.loaderService.hideLoader();
             },
             error: () => {
               this.toasterService.showToast('error', 'Failed to fetch video!');
+              this.loaderService.hideLoader();
             },
           });
         },
@@ -67,25 +72,45 @@ export class LayoutComponent {
             'error',
             'Failed to upload video for processing!'
           );
+          this.loaderService.hideLoader();
         },
       });
     } catch (error) {
       this.toasterService.showToast('error', 'Error during video rendering!');
+      this.loaderService.hideLoader();
     }
   }
 
-  public export() {
+  public async export() {
     if (this.selectedVideoUrl) {
-      const anchor = document.createElement('a');
-      anchor.href = this.selectedVideoUrl;
-      anchor.download = 'exported_video.mp4';
+      try {
+        this.loaderService.showLoader();
+        this.toasterService.showToast(
+          'warning',
+          'Exporting video, please wait...'
+        );
 
-      document.body.appendChild(anchor);
-      anchor.click();
+        // Simulating async export operation
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      document.body.removeChild(anchor);
+        const anchor = document.createElement('a');
+        anchor.href = this.selectedVideoUrl;
+        anchor.download = 'exported_video.mp4';
 
-      this.toasterService.showToast('success', 'Video exported successfully!');
+        document.body.appendChild(anchor);
+        anchor.click();
+
+        document.body.removeChild(anchor);
+
+        this.toasterService.showToast(
+          'success',
+          'Video exported successfully!'
+        );
+      } catch (error) {
+        this.toasterService.showToast('error', 'Error exporting the video!');
+      } finally {
+        this.loaderService.hideLoader();
+      }
     } else {
       this.toasterService.showToast('warning', 'No video available to export!');
     }
