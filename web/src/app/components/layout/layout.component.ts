@@ -40,12 +40,25 @@ export class LayoutComponent {
       formData.append('end', this.videoService.timeLineEnd().toString());
 
       this.apiService.processVideos(formData).subscribe({
+        next: (response: { id: string }) => {
+          console.log('Video processed successfully, ID:', response.id);
+
+          this.apiService.getVideoById(response.id).subscribe({
+            next: (videoBlob: Blob) => {
+              const videoUrl = URL.createObjectURL(videoBlob);
+              this.selectedVideoUrl = videoUrl;
+            },
+            error: (err) => {
+              console.error('Error fetching video:', err);
+            },
+          });
+        },
         error: (err) => {
           console.error('Upload error:', err);
         },
       });
     } catch (error) {
-      console.error('Ошибка при подготовке видео:', error);
+      console.error('Video error:', error);
     }
   }
 }

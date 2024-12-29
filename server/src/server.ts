@@ -44,8 +44,23 @@ const execPromise = (command: string): Promise<void> =>
     });
   });
 
+const clearProcessedVideos = () => {
+  try {
+    const files = fs.readdirSync(processedVideosDir);
+    files.forEach((file) => {
+      const filePath = path.join(processedVideosDir, file);
+      fs.unlinkSync(filePath);
+    });
+    console.log('Processed videos folder cleared.');
+  } catch (error) {
+    console.error('Failed to clear processed videos folder:', error);
+  }
+};
+
 app.post('/process', upload.array('videos'), async (req, res) => {
   try {
+    clearProcessedVideos();
+
     const { start, end } = req.body;
 
     if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
@@ -60,6 +75,7 @@ app.post('/process', upload.array('videos'), async (req, res) => {
       .map((file) => `file '${path.resolve(file.path)}'`)
       .join('\n');
 
+    console.log('Generated concat file content:\n', fileList); // Debug log
     fs.writeFileSync(concatFile, fileList);
 
     const outputFile = path.join(processedVideosDir, `${uuidv4()}.mp4`);
@@ -75,14 +91,36 @@ app.post('/process', upload.array('videos'), async (req, res) => {
 
     fs.unlinkSync(concatFile);
     fs.unlinkSync(tempFile);
-    videos.forEach((file) => fs.unlinkSync(file.path));
+    videos.forEach((file) => {
+      try {
+        fs.unlinkSync(file.path);
+      } catch (err) {
+        console.error(`Failed to delete file ${file.path}:`, err);
+      }
+    });
+
+    console.log('Temporary files successfully deleted.');
 
     const id = uuidv4();
     videoStore[id] = outputFile;
 
     res.json({ id });
   } catch (error) {
-    console.error(error);
+    console.error('Error processing videos:', error);
+
+    if (req.files && Array.isArray(req.files)) {
+      req.files.forEach((file) => {
+        try {
+          fs.unlinkSync(file.path);
+        } catch (err) {
+          console.error(
+            `Failed to delete file ${file.path} during error handling:`,
+            err
+          );
+        }
+      });
+    }
+
     res.status(500).json({ error: 'Error processing videos' });
   }
 });

@@ -15,7 +15,7 @@ export class ApiService {
     return this.http.post(`${this.apiUrl}/process`, data);
   }
 
-  getVideo(id: string): Observable<Blob> {
+  getVideoById(id: string): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/video/${id}`, {
       responseType: 'blob',
     });
