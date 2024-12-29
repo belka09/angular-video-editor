@@ -14,11 +14,12 @@ import {
 import { VideoService } from '../../services/video.service';
 import { computed } from '@angular/core';
 import { ToasterService } from '../../services/toaster.service';
+import { TimeFormatPipe } from '../../pipes/timeFormat.pipe';
 
 @Component({
   selector: 'app-timeline',
   standalone: true,
-  imports: [CommonModule, DragDropModule],
+  imports: [CommonModule, DragDropModule, TimeFormatPipe],
   templateUrl: './timeline.component.html',
   styleUrls: ['./timeline.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
