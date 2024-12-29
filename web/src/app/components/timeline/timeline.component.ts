@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   effect,
+  HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -25,6 +26,10 @@ export class TimelineComponent {
   timelineList = computed(() => this.videoService.timelineList());
   totalDuration = computed(() => this.videoService.totalDuration());
 
+  cursorPosition = 0;
+  isDragging = false;
+  timelineWidth = 0;
+
   constructor(
     private videoService: VideoService,
     private cdr: ChangeDetectorRef
@@ -36,6 +41,44 @@ export class TimelineComponent {
 
   createArray(count: number): number[] {
     return Array.from({ length: count }, (_, i) => i);
+  }
+
+  startDragging(event: MouseEvent): void {
+    const timelineElement = document.getElementById('timeline');
+    if (timelineElement) {
+      this.timelineWidth = timelineElement.getBoundingClientRect().width;
+      this.isDragging = true;
+    }
+    event.preventDefault();
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  onDrag(event: MouseEvent): void {
+    if (this.isDragging) {
+      const timelineElement = document.getElementById('timeline');
+      if (timelineElement) {
+        const rect = timelineElement.getBoundingClientRect();
+        this.cursorPosition = Math.max(
+          0,
+          Math.min(event.clientX - rect.left, rect.width)
+        );
+      }
+    }
+  }
+
+  @HostListener('document:mouseup')
+  stopDragging(): void {
+    if (this.isDragging) {
+      this.isDragging = false;
+      console.log(`Cursor position fixed at: ${this.cursorPosition}px`);
+    }
+  }
+
+  getCurrentSecond(): number {
+    if (this.timelineWidth === 0) return 0;
+    return Math.round(
+      (this.cursorPosition / this.timelineWidth) * this.totalDuration()
+    );
   }
 
   async onDrop(event: CdkDragDrop<any[]>) {

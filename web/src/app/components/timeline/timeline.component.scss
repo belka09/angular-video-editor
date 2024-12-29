@@ -1,3 +1,16 @@
+.timeline {
+  position: relative;
+  overflow: hidden;
+}
+
+.cursor-wrapper {
+  pointer-events: none;
+}
+
+.cursor-tail {
+  pointer-events: all;
+}
+
 .timeline-item {
   transition: transform 0.2s ease;
 }
