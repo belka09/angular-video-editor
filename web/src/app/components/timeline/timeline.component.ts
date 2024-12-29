@@ -41,22 +41,8 @@ export class TimelineComponent {
     });
   }
 
-  createArray(count: number): number[] {
-    return Array.from({ length: count }, (_, i) => i);
-  }
-
-  startDragging(event: MouseEvent): void {
-    const timelineElement = document.getElementById('timeline');
-    if (timelineElement) {
-      this.timelineWidth = timelineElement.getBoundingClientRect().width;
-      this.isDragging = true;
-      this.toasterService.showToast('warning', 'Dragging started.');
-    }
-    event.preventDefault();
-  }
-
   @HostListener('document:mousemove', ['$event'])
-  onDrag(event: MouseEvent): void {
+  public onDrag(event: MouseEvent): void {
     if (this.isDragging) {
       const timelineElement = document.getElementById('timeline');
       if (timelineElement) {
@@ -77,7 +63,7 @@ export class TimelineComponent {
   }
 
   @HostListener('document:mouseup')
-  stopDragging(): void {
+  public stopDragging(): void {
     if (this.isDragging) {
       this.isDragging = false;
       const second = this.getCurrentSecond();
@@ -88,16 +74,17 @@ export class TimelineComponent {
     }
   }
 
-  getCurrentSecond(): number {
-    if (this.timelineWidth === 0) return 1;
-    return (
-      Math.floor(
-        (this.cursorPosition / this.timelineWidth) * this.totalDuration()
-      ) + 1
-    );
+  public startDragging(event: MouseEvent): void {
+    const timelineElement = document.getElementById('timeline');
+    if (timelineElement) {
+      this.timelineWidth = timelineElement.getBoundingClientRect().width;
+      this.isDragging = true;
+      this.toasterService.showToast('warning', 'Dragging started.');
+    }
+    event.preventDefault();
   }
 
-  async onDrop(event: CdkDragDrop<any[]>) {
+  public async onDrop(event: CdkDragDrop<any[]>) {
     if (event.previousContainer === event.container) {
       const updatedList = [...this.timelineList()];
       moveItemInArray(updatedList, event.previousIndex, event.currentIndex);
@@ -131,5 +118,14 @@ export class TimelineComponent {
 
     this.videoService.recalculateTotalDuration();
     this.cdr.markForCheck();
+  }
+
+  private getCurrentSecond(): number {
+    if (this.timelineWidth === 0) return 1;
+    return (
+      Math.floor(
+        (this.cursorPosition / this.timelineWidth) * this.totalDuration()
+      ) + 1
+    );
   }
 }

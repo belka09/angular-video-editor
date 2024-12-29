@@ -30,12 +30,12 @@ export class LayoutComponent {
     private loaderService: LoaderService
   ) {}
 
-  onPlayVideo(url: string) {
+  public onPlayVideo(url: string) {
     this.selectedVideoUrl = url;
     this.toasterService.showToast('success', 'Video is now playing!');
   }
 
-  async renderVideo() {
+  public async renderVideo() {
     try {
       this.toasterService.showToast(
         'warning',

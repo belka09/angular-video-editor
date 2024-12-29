@@ -38,7 +38,7 @@ export class AllScenesComponent {
     private loaderService: LoaderService
   ) {}
 
-  async onFileSelected(event: any) {
+  public async onFileSelected(event: any) {
     const files = event.target.files;
     if (!files || files.length === 0) {
       this.toasterService.showToast('error', 'No files selected!');
@@ -86,7 +86,29 @@ export class AllScenesComponent {
     }
   }
 
-  async extractVideoDetails(
+  public playVideo(url: string) {
+    this.playEvent.emit(url);
+  }
+
+  public drop(event: CdkDragDrop<any[]>) {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(this.videos, event.previousIndex, event.currentIndex);
+      this.toasterService.showToast('success', 'Video order updated.');
+      return;
+    }
+  }
+
+  public removeVideo(index: number) {
+    const removedVideo = this.videos[index];
+    this.videos.splice(index, 1);
+    this.toasterService.showToast(
+      'success',
+      `Video "${removedVideo.name}" has been removed!`
+    );
+    this.cdr.markForCheck();
+  }
+
+  private async extractVideoDetails(
     videoUrl: string
   ): Promise<{ preview: string; duration: number }> {
     return new Promise((resolve, reject) => {
@@ -118,27 +140,5 @@ export class AllScenesComponent {
         reject(new Error('Error loading video metadata.'));
       };
     });
-  }
-
-  playVideo(url: string) {
-    this.playEvent.emit(url);
-  }
-
-  drop(event: CdkDragDrop<any[]>) {
-    if (event.previousContainer === event.container) {
-      moveItemInArray(this.videos, event.previousIndex, event.currentIndex);
-      this.toasterService.showToast('success', 'Video order updated.');
-      return;
-    }
-  }
-
-  removeVideo(index: number) {
-    const removedVideo = this.videos[index];
-    this.videos.splice(index, 1);
-    this.toasterService.showToast(
-      'success',
-      `Video "${removedVideo.name}" has been removed!`
-    );
-    this.cdr.markForCheck();
   }
 }
