@@ -4,6 +4,8 @@ import {
   ChangeDetectorRef,
   effect,
   HostListener,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -30,7 +32,9 @@ export class TimelineComponent {
 
   cursorPosition = 0;
   isDragging = false;
-  timelineWidth = 0;
+
+  @ViewChild('timelineWrapper') timelineWrapper!: ElementRef<HTMLDivElement>;
+  @ViewChild('timelineEl') timeline!: ElementRef<HTMLDivElement>;
 
   constructor(
     private videoService: VideoService,
@@ -45,21 +49,21 @@ export class TimelineComponent {
   @HostListener('document:mousemove', ['$event'])
   public onDrag(event: MouseEvent): void {
     if (this.isDragging) {
-      const timelineElement = document.getElementById('timeline');
-      if (timelineElement) {
-        const rect = timelineElement.getBoundingClientRect();
-        this.cursorPosition = Math.max(
-          0,
-          Math.min(event.clientX - rect.left, rect.width)
-        );
+      const wrapperRect =
+        this.timelineWrapper.nativeElement.getBoundingClientRect();
+      const innerContainer = this.timeline.nativeElement;
+      const cursorInContainer = Math.max(
+        0,
+        Math.min(
+          event.clientX - wrapperRect.left + innerContainer.scrollLeft,
+          innerContainer.scrollWidth
+        )
+      );
 
-        const second = this.getCurrentSecond();
-        this.videoService.cursorSecond.set(second);
-        this.toasterService.showToast(
-          'warning',
-          `Cursor moved to second: ${second}`
-        );
-      }
+      this.cursorPosition = cursorInContainer;
+
+      const correspondingSecond = this.getCurrentSecond(cursorInContainer);
+      this.videoService.cursorSecond.set(correspondingSecond);
     }
   }
 
@@ -67,22 +71,24 @@ export class TimelineComponent {
   public stopDragging(): void {
     if (this.isDragging) {
       this.isDragging = false;
-      const second = this.getCurrentSecond();
-      this.toasterService.showToast(
-        'success',
-        `Dragging stopped. Cursor fixed at second: ${second}`
-      );
     }
   }
 
   public startDragging(event: MouseEvent): void {
-    const timelineElement = document.getElementById('timeline');
-    if (timelineElement) {
-      this.timelineWidth = timelineElement.getBoundingClientRect().width;
-      this.isDragging = true;
-      this.toasterService.showToast('warning', 'Dragging started.');
-    }
+    this.isDragging = true;
     event.preventDefault();
+  }
+
+  private getCurrentSecond(cursorPosition: number): number {
+    if (!this.timeline || !this.timelineWrapper) return 1;
+
+    const totalSeconds = this.totalDuration();
+    const scrollLeft = this.timelineWrapper.nativeElement.scrollLeft;
+    const adjustedCursorPosition = cursorPosition + scrollLeft;
+
+    const timelineWidth = this.timeline.nativeElement.scrollWidth;
+
+    return Math.ceil((adjustedCursorPosition / timelineWidth) * totalSeconds);
   }
 
   public async onDrop(event: CdkDragDrop<any[]>) {
@@ -90,10 +96,6 @@ export class TimelineComponent {
       const updatedList = [...this.timelineList()];
       moveItemInArray(updatedList, event.previousIndex, event.currentIndex);
       this.videoService.timelineList.set(updatedList);
-      this.toasterService.showToast(
-        'success',
-        'Video order updated successfully!'
-      );
     } else {
       const file = event.previousContainer.data[event.previousIndex];
 
@@ -105,10 +107,6 @@ export class TimelineComponent {
       try {
         await this.videoService.generateFramesForVideo(newFile);
         this.videoService.timelineList.set([...this.timelineList(), newFile]);
-        this.toasterService.showToast(
-          'success',
-          'Video added to timeline successfully!'
-        );
       } catch (err) {
         this.toasterService.showToast(
           'error',
@@ -119,14 +117,5 @@ export class TimelineComponent {
 
     this.videoService.recalculateTotalDuration();
     this.cdr.markForCheck();
-  }
-
-  private getCurrentSecond(): number {
-    if (this.timelineWidth === 0) return 1;
-    return (
-      Math.floor(
-        (this.cursorPosition / this.timelineWidth) * this.totalDuration()
-      ) + 1
-    );
   }
 }
