@@ -24,6 +24,8 @@ export class VideoService {
   timeLineStart: WritableSignal<number> = signal(0);
   timeLineEnd = computed(() => this.totalDuration());
 
+  cursorSecond: WritableSignal<number> = signal(0);
+
   constructor() {}
 
   public async generateFramesForVideo(newFile: TimelineVideo): Promise<void> {

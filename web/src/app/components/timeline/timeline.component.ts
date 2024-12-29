@@ -62,6 +62,10 @@ export class TimelineComponent {
           0,
           Math.min(event.clientX - rect.left, rect.width)
         );
+
+        const second = this.getCurrentSecond();
+        this.videoService.cursorSecond.set(second);
+        console.log(`Cursor at second: ${second}`);
       }
     }
   }
@@ -70,13 +74,15 @@ export class TimelineComponent {
   stopDragging(): void {
     if (this.isDragging) {
       this.isDragging = false;
-      console.log(`Cursor position fixed at: ${this.cursorPosition}px`);
+      console.log(
+        `Cursor position fixed at second: ${this.getCurrentSecond()}`
+      );
     }
   }
 
   getCurrentSecond(): number {
     if (this.timelineWidth === 0) return 0;
-    return Math.round(
+    return Math.floor(
       (this.cursorPosition / this.timelineWidth) * this.totalDuration()
     );
   }
