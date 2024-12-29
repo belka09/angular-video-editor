@@ -92,7 +92,6 @@ export class VideoService {
       0
     );
     this.totalDuration.set(total);
-    console.log(this.totalDuration());
   }
 
   public async createFilesFromTimeline(): Promise<File[]> {

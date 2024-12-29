@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { VideoService } from '../../services/video.service';
+import { ToasterService } from '../../services/toaster.service';
 
 @Component({
   selector: 'app-preview',
@@ -26,7 +27,10 @@ export class PreviewComponent implements OnChanges, AfterViewInit {
   @ViewChild('videoPlayer', { static: false })
   videoPlayer!: ElementRef<HTMLVideoElement>;
 
-  constructor(private videoService: VideoService) {
+  constructor(
+    private videoService: VideoService,
+    private toasterService: ToasterService
+  ) {
     effect(() => {
       const currentSecond = this.videoService.cursorSecond();
       this.seekToSecond(currentSecond);
@@ -54,7 +58,24 @@ export class PreviewComponent implements OnChanges, AfterViewInit {
         this.seekToSecond(this.videoService.cursorSecond());
         videoElement
           .play()
-          .catch((err) => console.error('Autoplay failed:', err));
+          .then(() => {
+            this.toasterService.showToast(
+              'success',
+              'Video started playing successfully!'
+            );
+          })
+          .catch((err) => {
+            this.toasterService.showToast(
+              'error',
+              'Failed to autoplay video. Please play manually.'
+            );
+          });
+      };
+      videoElement.onerror = () => {
+        this.toasterService.showToast(
+          'error',
+          'An error occurred while loading the video.'
+        );
       };
     }
   }
@@ -67,7 +88,10 @@ export class PreviewComponent implements OnChanges, AfterViewInit {
         videoElement.duration
       );
       videoElement.currentTime = clampedSecond;
-      console.log(`Video playback moved to second: ${clampedSecond}`);
+      this.toasterService.showToast(
+        'warning',
+        `Video playback moved to second: ${clampedSecond}`
+      );
     }
   }
 }

@@ -5,6 +5,7 @@ import { PreviewComponent } from '../preview/preview.component';
 import { TimelineComponent } from '../timeline/timeline.component';
 import { VideoService } from '../../services/video.service';
 import { ApiService } from '../../services/api.service';
+import { ToasterService } from '../../services/toaster.service';
 
 @Component({
   selector: 'app-layout',
@@ -23,15 +24,21 @@ export class LayoutComponent {
 
   constructor(
     private apiService: ApiService,
-    private videoService: VideoService
+    private videoService: VideoService,
+    private toasterService: ToasterService
   ) {}
 
   onPlayVideo(url: string) {
     this.selectedVideoUrl = url;
+    this.toasterService.showToast('success', 'Video is now playing!');
   }
 
   async renderVideo() {
     try {
+      this.toasterService.showToast(
+        'warning',
+        'Rendering video, please wait...'
+      );
       const files: File[] = await this.videoService.createFilesFromTimeline();
 
       const formData = new FormData();
@@ -45,18 +52,25 @@ export class LayoutComponent {
             next: (videoBlob: Blob) => {
               const videoUrl = URL.createObjectURL(videoBlob);
               this.selectedVideoUrl = videoUrl;
+              this.toasterService.showToast(
+                'success',
+                'Video rendering completed!'
+              );
             },
-            error: (err) => {
-              console.error('Error fetching video:', err);
+            error: () => {
+              this.toasterService.showToast('error', 'Failed to fetch video!');
             },
           });
         },
-        error: (err) => {
-          console.error('Upload error:', err);
+        error: () => {
+          this.toasterService.showToast(
+            'error',
+            'Failed to upload video for processing!'
+          );
         },
       });
     } catch (error) {
-      console.error('Video error:', error);
+      this.toasterService.showToast('error', 'Error during video rendering!');
     }
   }
 
@@ -70,6 +84,10 @@ export class LayoutComponent {
       anchor.click();
 
       document.body.removeChild(anchor);
+
+      this.toasterService.showToast('success', 'Video exported successfully!');
+    } else {
+      this.toasterService.showToast('warning', 'No video available to export!');
     }
   }
 }

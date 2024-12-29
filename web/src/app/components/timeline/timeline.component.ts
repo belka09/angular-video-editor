@@ -13,6 +13,7 @@ import {
 } from '@angular/cdk/drag-drop';
 import { VideoService } from '../../services/video.service';
 import { computed } from '@angular/core';
+import { ToasterService } from '../../services/toaster.service';
 
 @Component({
   selector: 'app-timeline',
@@ -32,6 +33,7 @@ export class TimelineComponent {
 
   constructor(
     private videoService: VideoService,
+    private toasterService: ToasterService,
     private cdr: ChangeDetectorRef
   ) {
     effect(() => {
@@ -48,6 +50,7 @@ export class TimelineComponent {
     if (timelineElement) {
       this.timelineWidth = timelineElement.getBoundingClientRect().width;
       this.isDragging = true;
+      this.toasterService.showToast('warning', 'Dragging started.');
     }
     event.preventDefault();
   }
@@ -65,6 +68,10 @@ export class TimelineComponent {
 
         const second = this.getCurrentSecond();
         this.videoService.cursorSecond.set(second);
+        this.toasterService.showToast(
+          'warning',
+          `Cursor moved to second: ${second}`
+        );
       }
     }
   }
@@ -73,6 +80,11 @@ export class TimelineComponent {
   stopDragging(): void {
     if (this.isDragging) {
       this.isDragging = false;
+      const second = this.getCurrentSecond();
+      this.toasterService.showToast(
+        'success',
+        `Dragging stopped. Cursor fixed at second: ${second}`
+      );
     }
   }
 
@@ -90,6 +102,10 @@ export class TimelineComponent {
       const updatedList = [...this.timelineList()];
       moveItemInArray(updatedList, event.previousIndex, event.currentIndex);
       this.videoService.timelineList.set(updatedList);
+      this.toasterService.showToast(
+        'success',
+        'Video order updated successfully!'
+      );
     } else {
       const file = event.previousContainer.data[event.previousIndex];
 
@@ -98,9 +114,19 @@ export class TimelineComponent {
         frames: [],
       };
 
-      await this.videoService.generateFramesForVideo(newFile);
-
-      this.videoService.timelineList.set([...this.timelineList(), newFile]);
+      try {
+        await this.videoService.generateFramesForVideo(newFile);
+        this.videoService.timelineList.set([...this.timelineList(), newFile]);
+        this.toasterService.showToast(
+          'success',
+          'Video added to timeline successfully!'
+        );
+      } catch (err) {
+        this.toasterService.showToast(
+          'error',
+          'Failed to add video to timeline.'
+        );
+      }
     }
 
     this.videoService.recalculateTotalDuration();
