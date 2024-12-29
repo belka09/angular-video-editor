@@ -41,8 +41,6 @@ export class LayoutComponent {
 
       this.apiService.processVideos(formData).subscribe({
         next: (response: { id: string }) => {
-          console.log('Video processed successfully, ID:', response.id);
-
           this.apiService.getVideoById(response.id).subscribe({
             next: (videoBlob: Blob) => {
               const videoUrl = URL.createObjectURL(videoBlob);
