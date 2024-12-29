@@ -1,6 +1,6 @@
-# WAFFLLE Video Editor
+# Video Editor App
 
-WAFFLLE is a modern web-based video editing application that allows users to manage and edit video timelines with ease. It supports previewing, exporting, and rendering videos using a user-friendly interface.
+This project is a modern web-based video editing application that allows users to manage and edit video timelines with ease. It supports previewing, exporting, and rendering videos using a user-friendly interface.
 
 This project consists of **two parts**:
 - **Frontend**: A web-based UI built with Angular.
