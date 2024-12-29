@@ -59,4 +59,17 @@ export class LayoutComponent {
       console.error('Video error:', error);
     }
   }
+
+  public export() {
+    if (this.selectedVideoUrl) {
+      const anchor = document.createElement('a');
+      anchor.href = this.selectedVideoUrl;
+      anchor.download = 'exported_video.mp4';
+
+      document.body.appendChild(anchor);
+      anchor.click();
+
+      document.body.removeChild(anchor);
+    }
+  }
 }

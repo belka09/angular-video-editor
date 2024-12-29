@@ -7,15 +7,6 @@ img {
   border: 1px solid #ccc;
 }
 
-button {
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-button:hover {
-  background-color: #b91c1c; /* Darker red for hover */
-}
-
 .cdk-drag-placeholder {
   opacity: 0.2;
   width: 100%;

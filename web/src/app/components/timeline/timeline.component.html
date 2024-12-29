@@ -8,7 +8,7 @@
         <div *ngFor="let second of createArray(totalDuration()); let i = index; let last = last"
             class="text-white border-gray-400 border-r-2 flex-1 pt-1 text-center"
             [class.!border-r-0]="last">
-            {{ i }}
+            {{ i + 1 }}
         </div>
     </div>
 
@@ -39,7 +39,8 @@
             [ngStyle]="{ left: cursorPosition + 'px' }"
             (mousedown)="startDragging($event)">
             <div class="cursor bg-orange-500 h-full w-[2px]"></div>
-            <div class="cursor-tail bg-orange-500 w-4 h-4 rounded-full ml-[-6px] cursor-pointer"></div>
+            <div class="cursor-tail bg-orange-500 w-2 h-6 ml-[-2px] cursor-pointer absolute top-[-10px]"></div>
+            <div class="cursor-tail bg-orange-500 w-2 h-6 ml-[-2px] cursor-pointer absolute bottom-[-10px]"></div>
         </div>
     </div>
 
@@ -47,7 +48,7 @@
         <div *ngFor="let second of createArray(totalDuration()); let i = index; let last = last"
             class="text-white border-gray-400 border-r-2 flex-1 pt-1 text-center"
             [class.!border-r-0]="last">
-            {{ i }}
+            {{ i + 1 }}
         </div>
     </div>
 </div>

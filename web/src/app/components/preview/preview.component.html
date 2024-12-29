@@ -1,9 +1,13 @@
-<div class="flex items-center justify-center h-full bg-gray-400 rounded">
-    <video *ngIf="videoUrl"
-        [src]="videoUrl"
+<div class="flex items-center justify-center h-full bg-gray-400 rounded relative">
+    @if(videoUrl) {
+    <video [src]="videoUrl"
+        #videoPlayer
+        autoplay
         controls
-        class="w-full h-auto"></video>
-    <ng-template #placeholder>
-        <p class="text-gray-700 text-sm">No preview available</p>
-    </ng-template>
+        class="w-auto max-h-[450px] max-w-full"></video>
+    } @else {
+    <div class="placeholder absolute inset-0 flex items-center justify-center bg-gray-300">
+        <p class="text-gray-700 text-sm mt-2">Preview...</p>
+    </div>
+    }
 </div>
