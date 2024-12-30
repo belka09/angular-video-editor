@@ -21,11 +21,12 @@
             style="min-width: 100%; width: max-content;">
             <!-- Top Time Scale -->
             <div class="flex justify-between border-b-[1px] border-gray-400 bg-gray-700">
-                <div *ngFor="let second of [].constructor(totalDuration()); let i = index; let last = last"
-                    class="text-white border-gray-400 border-r-2 flex-shrink-0 w-12 pt-1 text-center text-xs flex-1"
+                @for(second of [].constructor(totalDuration()); let i = $index; let last = $last; track $index) {
+                <div class="text-white border-gray-400 border-r-2 flex-shrink-0 w-12 pt-1 text-center text-xs flex-1"
                     [class.!border-r-0]="last">
                     {{ i + 1 | timeFormat }}
                 </div>
+                }
             </div>
 
             <!-- Timeline and Drag-Drop Area -->
@@ -38,28 +39,31 @@
                 (cdkDropListDropped)="onDrop($event)"
                 style="min-height: 80px;">
                 <!-- Video Elements -->
-                <div *ngFor="let file of timelineList(); let i = index; let last = last"
-                    class="timeline-item flex overflow-hidden gap-1"
+                @for(file of timelineList(); let i = $index; let last = $last; track $index) {
+                <div class="timeline-item flex overflow-hidden gap-1"
                     cdkDrag
                     [style.flexGrow]="file.duration"
                     style="flex-basis: 0;">
+                    @for(frame of file.frames; let s = $index; track $index) {
                     <div class="flex flex-1 flex-col items-center justify-center"
-                        [class.!border-r-0]="last"
-                        *ngFor="let frame of file.frames; let s = index">
+                        [class.!border-r-0]="last">
                         <img [src]="frame"
                             alt="Frame"
                             class="object-cover" />
                     </div>
+                    }
                 </div>
+                }
             </div>
 
             <!-- Bottom Time Scale -->
             <div class="flex justify-between border-t-[1px] border-gray-400 bg-gray-700">
-                <div *ngFor="let second of [].constructor(totalDuration()); let i = index; let last = last"
-                    class="text-white border-gray-400 border-r-2 flex-shrink-0 w-12 pt-1 text-center text-xs flex-1"
+                @for(second of [].constructor(totalDuration()); let i = $index; let last = $last; track $index) {
+                <div class="text-white border-gray-400 border-r-2 flex-shrink-0 w-12 pt-1 text-center text-xs flex-1"
                     [class.!border-r-0]="last">
                     {{ i + 1 | timeFormat }}
                 </div>
+                }
             </div>
         </div>
     </div>
