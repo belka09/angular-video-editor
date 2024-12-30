@@ -17,6 +17,9 @@ export class VideoService {
   timeLineStart: WritableSignal<number> = signal(0);
   timeLineEnd = computed(() => this.totalDuration());
   cursorSecond: WritableSignal<number> = signal(0);
+  isTimelineModified: WritableSignal<boolean> = signal(false);
+
+  isVideoPlaying: WritableSignal<boolean> = signal(false);
 
   constructor() {}
 
@@ -121,5 +124,23 @@ export class VideoService {
     }
 
     return files;
+  }
+
+  /**
+   * Marks the timeline as modified.
+   * This is used to indicate that changes have been made to the timeline (e.g., videos added, removed, or reordered).
+   * Sets the `isTimelineModified` signal to `true`.
+   */
+  public markTimelineAsModified(): void {
+    this.isTimelineModified.set(true);
+  }
+
+  /**
+   * Clears the modification flag for the timeline.
+   * This is used to indicate that the current timeline state has been processed or saved, and no further changes exist.
+   * Sets the `isTimelineModified` signal to `false`.
+   */
+  public clearTimelineModification(): void {
+    this.isTimelineModified.set(false);
   }
 }

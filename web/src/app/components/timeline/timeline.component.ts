@@ -96,6 +96,7 @@ export class TimelineComponent {
       const updatedList = [...this.timelineList()];
       moveItemInArray(updatedList, event.previousIndex, event.currentIndex);
       this.videoService.timelineList.set(updatedList);
+      this.videoService.markTimelineAsModified();
     } else {
       const file = event.previousContainer.data[event.previousIndex];
 
@@ -107,6 +108,7 @@ export class TimelineComponent {
       try {
         await this.videoService.generateFramesForVideo(newFile);
         this.videoService.timelineList.set([...this.timelineList(), newFile]);
+        this.videoService.markTimelineAsModified();
       } catch (err) {
         this.toasterService.showToast(
           'error',
@@ -114,7 +116,6 @@ export class TimelineComponent {
         );
       }
     }
-
     this.videoService.recalculateTotalDuration();
     this.cdr.markForCheck();
   }

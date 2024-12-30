@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AllScenesComponent } from '../all-scenes/all-scenes.component';
 import { PreviewComponent } from '../preview/preview.component';
@@ -22,6 +22,7 @@ import { LoaderService } from '../../services/loader.service';
 })
 export class LayoutComponent {
   selectedVideoUrl: string | null = null;
+  isVideoPlaying = computed(() => this.videoService.isVideoPlaying());
 
   constructor(
     private apiService: ApiService,
@@ -37,48 +38,63 @@ export class LayoutComponent {
 
   public async renderVideo() {
     try {
-      this.toasterService.showToast(
-        'warning',
-        'Rendering video, please wait...'
-      );
-      this.loaderService.showLoader();
-      const files: File[] = await this.videoService.createFilesFromTimeline();
+      if (this.videoService.isTimelineModified()) {
+        this.toasterService.showToast(
+          'warning',
+          'Rendering video, please wait...'
+        );
+        this.loaderService.showLoader();
 
-      const formData = new FormData();
-      files.forEach((file) => formData.append('videos', file));
-      formData.append('start', this.videoService.timeLineStart().toString());
-      formData.append('end', this.videoService.timeLineEnd().toString());
+        const files: File[] = await this.videoService.createFilesFromTimeline();
 
-      this.apiService.processVideos(formData).subscribe({
-        next: (response: { id: string }) => {
-          this.apiService.getVideoById(response.id).subscribe({
-            next: (videoBlob: Blob) => {
-              const videoUrl = URL.createObjectURL(videoBlob);
-              this.selectedVideoUrl = videoUrl;
-              this.toasterService.showToast(
-                'success',
-                'Video rendering completed!'
-              );
-              this.loaderService.hideLoader();
-            },
-            error: () => {
-              this.toasterService.showToast('error', 'Failed to fetch video!');
-              this.loaderService.hideLoader();
-            },
-          });
-        },
-        error: () => {
-          this.toasterService.showToast(
-            'error',
-            'Failed to upload video for processing!'
-          );
-          this.loaderService.hideLoader();
-        },
-      });
+        const formData = new FormData();
+        files.forEach((file) => formData.append('videos', file));
+        formData.append('start', this.videoService.timeLineStart().toString());
+        formData.append('end', this.videoService.timeLineEnd().toString());
+
+        this.apiService.processVideos(formData).subscribe({
+          next: (response: { id: string }) => {
+            this.apiService.getVideoById(response.id).subscribe({
+              next: (videoBlob: Blob) => {
+                const videoUrl = URL.createObjectURL(videoBlob);
+                this.selectedVideoUrl = videoUrl;
+                this.videoService.isVideoPlaying.set(true);
+                this.videoService.clearTimelineModification();
+                this.toasterService.showToast(
+                  'success',
+                  'Video rendering completed!'
+                );
+                this.loaderService.hideLoader();
+              },
+              error: () => {
+                this.toasterService.showToast(
+                  'error',
+                  'Failed to fetch video!'
+                );
+                this.loaderService.hideLoader();
+              },
+            });
+          },
+          error: () => {
+            this.toasterService.showToast(
+              'error',
+              'Failed to upload video for processing!'
+            );
+            this.loaderService.hideLoader();
+          },
+        });
+      } else {
+        this.videoService.isVideoPlaying.set(true);
+        this.toasterService.showToast('success', 'Playing existing video!');
+      }
     } catch (error) {
       this.toasterService.showToast('error', 'Error during video rendering!');
       this.loaderService.hideLoader();
     }
+  }
+
+  public pauseVideo() {
+    this.videoService.isVideoPlaying.set(false);
   }
 
   public async export() {

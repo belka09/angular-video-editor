@@ -32,6 +32,11 @@ export class PreviewComponent implements OnChanges, AfterViewInit {
     private toasterService: ToasterService
   ) {
     effect(() => {
+      const isPlaying = this.videoService.isVideoPlaying();
+      isPlaying ? this.playVideo() : this.pauseVideo();
+    });
+
+    effect(() => {
       const currentSecond = this.videoService.cursorSecond();
       this.seekToSecond(currentSecond);
     });
@@ -56,20 +61,7 @@ export class PreviewComponent implements OnChanges, AfterViewInit {
       videoElement.load();
       videoElement.onloadedmetadata = () => {
         this.seekToSecond(this.videoService.cursorSecond());
-        videoElement
-          .play()
-          .then(() => {
-            this.toasterService.showToast(
-              'success',
-              'Video started playing successfully!'
-            );
-          })
-          .catch((err) => {
-            this.toasterService.showToast(
-              'error',
-              'Failed to autoplay video. Please play manually.'
-            );
-          });
+        this.toasterService.showToast('success', 'Video loaded successfully!');
       };
       videoElement.onerror = () => {
         this.toasterService.showToast(
@@ -92,6 +84,28 @@ export class PreviewComponent implements OnChanges, AfterViewInit {
         'warning',
         `Video playback moved to second: ${clampedSecond}`
       );
+    }
+  }
+
+  private playVideo(): void {
+    const videoElement = this.videoPlayer?.nativeElement;
+    if (videoElement) {
+      videoElement
+        .play()
+        .then(() => {
+          this.toasterService.showToast('success', 'Video is now playing.');
+        })
+        .catch(() => {
+          this.toasterService.showToast('error', 'Failed to play the video.');
+        });
+    }
+  }
+
+  private pauseVideo(): void {
+    const videoElement = this.videoPlayer?.nativeElement;
+    if (videoElement) {
+      videoElement.pause();
+      this.toasterService.showToast('success', 'Video playback paused.');
     }
   }
 }

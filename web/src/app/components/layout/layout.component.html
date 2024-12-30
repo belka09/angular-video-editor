@@ -25,9 +25,15 @@
                 ➖
             </button>
         </div>
+        @if(!isVideoPlaying()) {
         <button type="button"
             class="text-white py-2 px-6 rounded-md bg-gray-700 hover:bg-gray-900 transition-all"
-            (click)="renderVideo()">Generate 🔄</button>
+            (click)="renderVideo()">Play ▶</button>
+        } @else {
+        <button type="button"
+            class="text-white py-2 px-6 rounded-md bg-gray-700 hover:bg-gray-900 transition-all"
+            (click)="pauseVideo()">Pause ❚❚</button>
+        }
     </section>
     <section class="mt-4 p-4 bg-white shadow rounded">
         <app-timeline></app-timeline>
